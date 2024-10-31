@@ -30,7 +30,7 @@ class NetworkManager {
             let genericError: RepoError = RepoError(message: "A network error has occurred. Check your Internet connection and try again later.", userNotFound: false)
             let userNotFoundError: RepoError = RepoError(message: "User not found. Please enter another name", userNotFound: true)
 
-            if let error = error {
+            if let _ = error {
                 completion(.failure(genericError))
                 return
             }

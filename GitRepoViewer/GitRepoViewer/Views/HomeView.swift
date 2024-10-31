@@ -11,61 +11,71 @@ struct HomeView: View {
 
     @StateObject var viewModel: RepoViewModel = RepoViewModel()
     @State private var username: String = ""
+    @State private var showReposListView: Bool = false
     @State private var showErrorMessage: Bool = false
     @State private var showUserNotFoundMessage: Bool = false
     @State private var errorMessage: String = ""
 
     var body: some View {
-        VStack {
-            VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    Text("GitHub Viewer")
-                        .font(.system(size: 22))
-                        .foregroundStyle(Color.primary)
-                    Spacer()
-                }
-                .frame(height: 50)
-                .background {
-                    Color.secondary
-                        .opacity(0.2)
-                        .ignoresSafeArea()
-                }
-
-                Color.gray
-                    .frame(height: 1)
-            }
-
-            Spacer()
-
-            VStack(spacing: 28) {
-
-                // textfield
-                TextField("Username", text: $username)
-                    .textInputAutocapitalization(.never)
-                    .font(.system(size: 20))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+        NavigationStack {
+            VStack {
+                VStack(spacing: 0) {
+                    HStack {
+                        Spacer()
+                        Text("GitHub Viewer")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.primary)
+                        Spacer()
+                    }
+                    .frame(height: 50)
                     .background {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.secondary.opacity(0.2))
-                            .stroke(Color.secondary.opacity(0.4), lineWidth: 1)
+                        Color.secondary
+                            .opacity(0.2)
+                            .ignoresSafeArea()
                     }
 
-                // search button
-                Button {
-                    if !username.isEmpty {
-                        viewModel.fetchRepos(from: username)
-                    }
-                } label: {
-                    Text("Search")
-                        .font(.system(size: 24))
-                        .foregroundStyle(Color.accentColor)
+                    Color.gray
+                        .frame(height: 1)
                 }
-            }
-            .padding(.horizontal, 20)
 
-            Spacer()
+                Spacer()
+
+                VStack(spacing: 28) {
+
+                    // textfield
+                    TextField("Username", text: $username)
+                        .textInputAutocapitalization(.never)
+                        .font(.system(size: 20))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.secondary.opacity(0.2))
+                                .stroke(Color.secondary.opacity(0.4), lineWidth: 1)
+                        }
+
+                    // search button
+                    Button {
+                        if !username.isEmpty {
+                            viewModel.fetchRepos(from: username)
+                        }
+                    } label: {
+                        if viewModel.isSearching {
+                            ProgressView()
+                        } else {
+                            Text("Search")
+                                .font(.system(size: 24))
+                                .foregroundStyle(Color.accentColor)
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+
+                Spacer()
+            }
+            .navigationDestination(isPresented: $showReposListView, destination: {
+                ReposListView(viewModel: viewModel)
+            })
         }
         .onChange(of: viewModel.genericError) { oldValue, newValue in
             if !oldValue && newValue, let repoError = viewModel.repoError {
@@ -79,6 +89,11 @@ struct HomeView: View {
                 self.errorMessage = repoError.message
             }
         }
+        .onChange(of: viewModel.repos, { oldValue, newValue in
+            if let repos = newValue, repos.count > 0 {                
+                self.showReposListView = true
+            }
+        })
         .alert("", isPresented: $showErrorMessage) {} message: {
             Text(self.errorMessage)
         }

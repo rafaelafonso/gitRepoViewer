@@ -13,9 +13,14 @@ class RepoViewModel: ObservableObject {
     @Published var repoError: RepoError? = nil
     @Published var genericError: Bool = false
     @Published var userNotFound: Bool = false
+    @Published var isSearching: Bool = false
 
     func fetchRepos(from username: String) {
+        self.isSearching = true
+        
         RepoService().fetchRepos(username: username) { result in
+            self.isSearching = false
+
             switch result {
             case .success(let repos):
                 self.repos = repos
