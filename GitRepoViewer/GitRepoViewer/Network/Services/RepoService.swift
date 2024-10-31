@@ -21,11 +21,17 @@ struct RepoService {
                         completion(.success(repos))
                     } catch {
                         print(">Service error #1: \(error.localizedDescription)")
-                        completion(.failure(RepoError(message: error.localizedDescription)))
+//                        completion(.failure(RepoError(message: error.localizedDescription)))
+                        if let repoError = error as? RepoError {
+                            completion(.failure(repoError))
+                        }
                     }
                 case .failure(let error):
-                    print(">Service error #2: \(error.localizedDescription)")
-                    completion(.failure(RepoError(message: error.localizedDescription)))
+                    print(">Service error #2: \(error)")
+//                    completion(.failure(RepoError(message: error.localizedDescription)))
+                    if let repoError = error as? RepoError {
+                        completion(.failure(repoError))
+                    }
                 }
             }
         }

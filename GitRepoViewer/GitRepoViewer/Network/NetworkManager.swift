@@ -25,17 +25,23 @@ class NetworkManager {
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let httpResponse = response as? HTTPURLResponse else { return }
-            guard let data = data, let responseString = String(data: data, encoding: .utf8) else { return }
+            guard let data = data, let _ = String(data: data, encoding: .utf8) else { return }
+
+            let genericError: RepoError = RepoError(message: "A network error has occurred. Check your Internet connection and try again later.", userNotFound: false)
+            let userNotFoundError: RepoError = RepoError(message: "User not found. Please enter another name", userNotFound: true)
 
             if let error = error {
-                print(">Error: \(error)")
-                completion(.failure(error))
+                completion(.failure(genericError))
                 return
             }
 
             guard httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 else {
-                print(">Bad server response")
-                completion(.failure(URLError(.badServerResponse)))
+                print(">Bad server response. Status code \(httpResponse.statusCode)")
+                if httpResponse.statusCode == 404 {
+                    completion(.failure(userNotFoundError))
+                } else {
+                    completion(.failure(genericError))
+                }
                 return
             }
             print(">Completion success!")

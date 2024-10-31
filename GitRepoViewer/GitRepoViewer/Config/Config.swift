@@ -10,3 +10,5 @@ import Foundation
 enum Config: String {
     case baseURLString = "https://api.github.com/users/"
 }
+
+

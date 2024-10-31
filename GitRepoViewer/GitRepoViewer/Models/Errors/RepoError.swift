@@ -9,8 +9,10 @@ import Foundation
 
 class RepoError: Error {
     var message: String
+    var userNotFound: Bool
 
-    init(message: String) {
+    init(message: String, userNotFound: Bool) {
         self.message = message
+        self.userNotFound = userNotFound
     }
 }
